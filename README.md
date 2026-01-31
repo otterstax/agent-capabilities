@@ -1,10 +1,6 @@
 # OtterStax Agent Capabilities
 
 <p align="center">
-  <img src="docs/assets/logo.png" alt="OtterStax" width="200"/>
-</p>
-
-<p align="center">
   <strong>A public registry of skills and MCP specifications for OtterStax</strong><br>
   <em>Designed for AI agents and runtimes</em>
 </p>
