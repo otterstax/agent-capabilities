@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otterstax-config
+  namespace: otterstax
+  labels:
+    app.kubernetes.io/name: otterstax
+    app.kubernetes.io/component: config
+data:
+  OTTERSTAX_LOG_LEVEL: "info"
+  OTTERSTAX_MYSQL_PORT: "8816"
+  OTTERSTAX_HTTP_PORT: "8085"

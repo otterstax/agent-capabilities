@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otterstax-server
+  namespace: otterstax
+  labels:
+    app.kubernetes.io/name: otterstax
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otterstax-server
+  template:
+    metadata:
+      labels:
+        app: otterstax-server
+        app.kubernetes.io/name: otterstax
+        app.kubernetes.io/component: server
+    spec:
+      containers:
+      - name: otterstax
+        image: otterstax/server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8816
+          name: mysql
+          protocol: TCP
+        - containerPort: 8085
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: otterstax-config
+        - secretRef:
+            name: otterstax-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

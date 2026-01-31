@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  otterstax:
+    image: otterstax/server:latest
+    container_name: otterstax
+    ports:
+      - "8816:8816"  # MySQL protocol
+      - "8085:8085"  # HTTP API
+    environment:
+      - OTTERSTAX_LOG_LEVEL=info
+    depends_on:
+      mariadb1:
+        condition: service_healthy
+      mariadb2:
+        condition: service_healthy
+    networks:
+      - otterstax-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mariadb1:
+    image: mariadb:10.11
+    container_name: mariadb1
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: db1
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: password1
+    ports:
+      - "3101:3306"
+    volumes:
+      - ./init/mariadb1:/docker-entrypoint-initdb.d
+      - mariadb1-data:/var/lib/mysql
+    networks:
+      - otterstax-net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mariadb2:
+    image: mariadb:10.11
+    container_name: mariadb2
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: db2
+      MYSQL_USER: user2
+      MYSQL_PASSWORD: password2
+    ports:
+      - "3102:3306"
+    volumes:
+      - ./init/mariadb2:/docker-entrypoint-initdb.d
+      - mariadb2-data:/var/lib/mysql
+    networks:
+      - otterstax-net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  otterstax-net:
+    driver: bridge
+
+volumes:
+  mariadb1-data:
+  mariadb2-data:
